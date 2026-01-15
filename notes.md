@@ -6,12 +6,12 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 
 | User activity                                       | Frontend component | Backend endpoints | Database SQL |
 | --------------------------------------------------- | ------------------ | ----------------- | ------------ |
-| View home page                                      |                    |                   |              |
-| Register new user<br/>(t@jwt.com, pw: test)         |                    |                   |              |
-| Login new user<br/>(t@jwt.com, pw: test)            |                    |                   |              |
-| Order pizza                                         |                    |                   |              |
-| Verify pizza                                        |                    |                   |              |
-| View profile page                                   |                    |                   |              |
+| View home page                                      |  `home.tsx`          |       none        |    none      |
+| Register new user<br/>(t@jwt.com, pw: test)         |  `register.tsx`      |   `POST api/auth`   |  ` INSERT INTO user (name, email, password) VALUES (?, ?, ?), [user.name, user.email, hashedPassword])`  <br/>  `INSERT INTO userRole (userId, role, objectId) VALUES (?, ?, ?), [userId, role.role, 0])`        |
+| Login new user<br/>(t@jwt.com, pw: test)            |   `login.tsx` <br/>  `httpPizzaService.ts`                |    `[PUT] api/auth`               |   `SELECT * FROM user WHERE email=?, [email]` <br/>  `SELECT * FROM userRole WHERE userId=?, [user.id] `       |
+| Order pizza                                         |       `menu.tsx`  <br/> `payment.jsx` <br/> `delivery.jsx`           |     `[GET] api/order/menu` <br/> `[GET] api/user/me` <br/> `[POST] api/order` <br/> `[POST] api/order` <br/> (backend to pizza factory)    |    `SELECT * FROM menu`  <br/>   `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now()), [user.id, order.franchiseId, order.storeId]` <br/> `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?), [orderId, menuId, item.description, item.price]`     |
+| Verify pizza                                        |    `delivery.tsx`                |   `[POST] api/order/verify` (Pizza factory)               |    none        |
+| View profile page                                   |                    |    `[GET] api/order`               |              |
 | View franchise<br/>(as diner)                       |                    |                   |              |
 | Logout                                              |                    |                   |              |
 | View About page                                     |                    |                   |              |
