@@ -26,3 +26,29 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 | View Admin page                                     |    `adminDashboard.tsx`                |     `[GET] /api/franchise?page=${page}&limit=${limit}&name=${nameFilter}`              |   `SELECT id, name FROM franchise WHERE name LIKE ? LIMIT ${limit + 1} OFFSET ${offset}, [nameFilter]` <br/> `SELECT id, name FROM store WHERE franchiseId=?, [franchise.id]`  <br/> Something feels off about this endpoint. Might look into it later.        |
 | Create a franchise for t@jwt.com                    |     `createFranchise.tsx`               |    `[POST] /api/franchise`               |    `SELECT id, name FROM user WHERE email=?, [admin.email]` <br/> `INSERT INTO franchise (name) VALUES (?), [franchise.name]` <br/> `INSERT INTO userRole (userId, role, objectId) VALUES (?, ?, ?), [admin.id, Role.Franchisee, franchise.id]`         |
 | Close the franchise for t@jwt.com                   |     `closeStore.tsx`               |    `[DELETE] api/franchise/${franchiseID}`               |    `DELETE FROM store WHERE franchiseId=?, [franchiseId]`   <br/> `DELETE FROM userRole WHERE objectId=?, [franchiseId]` <br/> `DELETE FROM franchise WHERE id=?, [franchiseId]`      |
+
+
+
+**Common Jest Matchers**
+
+### **Jest Expect Matchers Summary**
+
+| Matcher Category | Matcher | Description | Example |
+| :--- | :--- | :--- | :--- |
+| **Equality** | `toBe()` | Tests exact / referential equality. | `expect(add(1, 1)).toBe(2);` |
+| | `toEqual()` | Tests deep equality (useful for objects/arrays); ignores `undefined`. | `expect({ id: 2 }).toEqual({ id: 2 });` |
+| **Truthy/Falsy** | `toBeTruthy()` | Asserts the value is considered `true` in a boolean context. | `expect(true).toBeTruthy();` |
+| | `toBeFalsy()` | Asserts the value is considered `false` (e.g., `0`, `null`, `undefined`). | `expect(0).toBeFalsy();` |
+| | `toBeDefined()` | Asserts that a value is not `undefined`. | `expect(null).toBeDefined();` |
+| | `toBeUndefined()` | Asserts that a value is exactly `undefined`. | `expect(undefined).toBeUndefined();` |
+| | `toBeNull()` | Asserts that a value is exactly `null`. | `expect(null).toBeNull();` |
+| **Numbers** | `toBeGreaterThan()` | Asserts value is strictly greater than the target. | `expect(4).toBeGreaterThan(3);` |
+| | `toBeLessThan()` | Asserts value is strictly less than the target. | `expect(4).toBeLessThan(5);` |
+| | `toBeCloseTo()` | Compares floating-point numbers for approximate equality. | `expect(0.3000001).toBeCloseTo(0.3);` |
+| **Regex** | `toMatch()` | Checks if a string matches a regular expression pattern. | `expect(body).toMatch(/{"date":".*"}/);` |
+| **Collections** | `toContain()` | Checks if an array contains an item or a string contains a substring. | `expect([1, 2, 3]).toContain(2);` |
+| | `toHaveProperty()` | Checks if an object has a specific property (and optionally its value). | `expect(obj).toHaveProperty('cost', 3);` |
+| | `toMatchObject()` | Checks if an object matches a subset of properties of another object. | `expect(obj).toMatchObject({ id: 2 });` |
+| **Exceptions** | `toThrow()` | Asserts that a function throws an error when executed. | `expect(() => { throw new Error(); }).toThrow();` |
+
+> **Note:** Use `.not` before any
