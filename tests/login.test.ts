@@ -7,6 +7,10 @@ async function basicInit(page: Page) {
   // Authorize login for the given user
   await page.route('*/**/api/auth', async (route) => {
     const loginReq = route.request().postDataJSON();
+    if (route.request().method() == 'DELETE'){
+       await route.fulfill({json: {message :"logout successful"}})
+       return;
+    }
     const user = validUsers[loginReq.email];
     if (!user || user.password !== loginReq.password) {
       await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
@@ -19,6 +23,7 @@ async function basicInit(page: Page) {
     };
     expect(route.request().method()).toBe('PUT');
     await route.fulfill({ json: loginRes });
+    
   });
 
   // Return the currently logged in user
@@ -135,4 +140,20 @@ test('about and history', async ({page}) => {
   await page.getByRole('link', { name: 'History' }).click();
   await expect(page.getByRole('heading')).toContainText('Mama Rucci, my my');
   await expect(page.getByRole('main').getByRole('img')).toBeVisible();
+})
+
+test('logout', async ({page}) => {
+  await basicInit(page);
+
+  //login guy
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
+  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+  
+  //test logout
+  await page.getByRole('link', { name: 'Logout' }).click();
+  await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Register'})).toBeVisible();
 })
