@@ -1,8 +1,12 @@
 import { test, expect } from 'playwright-test-coverage';
 
+async function adminLogin(page: Page)
+
+
+
 async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
-  const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: 'diner' }] } };
+  const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: 'diner' }] }, 'john@jwt.com': { id: '4', name: 'John Franchise', email: 'john@jwt.com', password: '1234', roles: [{ role: 'diner' },{objectId: 2, role: "franchisee"}] }, 'a@jwt.com': { id: '5', name: 'Admin Bob', email: 'a@jwt.com', password: 'a', roles: [{ role: 'admin' }] }};
 
   // Authorize login for the given user
   await page.route('*/**/api/auth', async (route) => {
@@ -54,6 +58,27 @@ async function basicInit(page: Page) {
     await route.fulfill({ json: menuRes });
   });
 
+    //Franchisee view
+  await page.route('api/franchise/2', async (route) => {
+   const franchiseRes = [
+      {
+          "id": 4,
+          "name": "John's Franchise",
+          "admins": [
+              {
+                  "id": 2,
+                  "name": "John Franchise",
+                  "email": "john@john.com"
+              }
+          ],
+          "stores": []
+      }
+    ]
+    expect(route.request().method()).toBe('GET');
+    await route.fulfill({ json: franchiseRes });
+
+  })
+
   // Standard franchises and stores
   await page.route(/\/api\/franchise(\?.*)?$/, async (route) => {
     const franchiseRes = {
@@ -74,6 +99,7 @@ async function basicInit(page: Page) {
     expect(route.request().method()).toBe('GET');
     await route.fulfill({ json: franchiseRes });
   });
+
 
   // Order a pizza.
   await page.route('*/**/api/order', async (route) => {
@@ -156,4 +182,43 @@ test('logout', async ({page}) => {
   await page.getByRole('link', { name: 'Logout' }).click();
   await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Register'})).toBeVisible();
+})
+
+test('login as franchisee', async ({page}) => {
+  await basicInit(page);
+  
+  await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+  await expect(page.getByText('So you want a piece of the')).toBeVisible();
+  await page.getByRole('link', { name: 'Login', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('john@jwt.com');
+  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('1234');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+})
+
+test('login as admin', async ({page})=> {
+  await basicInit(page);
+
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
+  await page.getByRole('link', { name: 'Admin' }).click();
+  await expect(page.getByText('Mama Ricci\'s kitchen')).toBeVisible();
+  
+  await expect(page.getByRole('table')).toContainText('LotaPizza');
+  await page.getByRole('cell', { name: 'Lehi' }).click();
+  await expect(page.getByRole('table')).toContainText('Lehi');
+  await expect(page.getByRole('table')).toContainText('Springville');
+  await expect(page.getByRole('table')).toContainText('American Fork');
+  await expect(page.getByRole('table')).toContainText('PizzaCorp');
+  await expect(page.getByRole('table')).toContainText('topSpot');
+  await page.getByRole('button', { name: 'Add Franchise' }).click();
+  await expect(page.getByRole('heading')).toContainText('Create franchise');
+  await expect(page.locator('form')).toContainText('Create');
+
+  await page.getByRole('button', { name: 'Cancel' }).click();
 })
