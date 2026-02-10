@@ -281,6 +281,16 @@ test('create and delete franchise', async ({page}) => {
   await expect(page.locator('h3')).toContainText('Franchises');
 })
 
+test('close a store', async ({page}) => {
+  await basicInit(page);
+  await adminLogin(page);
+
+  await page.getByRole('row', { name: 'Lehi ₿ Close' }).getByRole('button').click();
+  await expect(page.getByRole('heading')).toContainText('Sorry to see you go');
+  await expect(page.getByRole('main')).toContainText('Lehi');
+  await expect(page.getByRole('main')).toContainText('LotaPizza');
+})
+
 test('register new user', async ({page}) => {
   await basicInit(page);
 
