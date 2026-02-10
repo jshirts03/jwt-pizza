@@ -59,7 +59,7 @@ async function basicInit(page: Page) {
   });
 
     //Franchisee view
-  await page.route('api/franchise/2', async (route) => {
+  await page.route(/\/api\/franchise\/\d+/, async (route) => {
    const franchiseRes = [
       {
           "id": 4,
@@ -71,7 +71,12 @@ async function basicInit(page: Page) {
                   "email": "john@john.com"
               }
           ],
-          "stores": []
+          "stores": [
+            { id: 4, name: 'Lehi' },
+            { id: 5, name: 'Springville' },
+            { id: 6, name: 'American Fork' },
+          ],
+          "total revenue": 0,
       }
     ]
     expect(route.request().method()).toBe('GET');
@@ -186,15 +191,27 @@ test('logout', async ({page}) => {
 
 test('login as franchisee', async ({page}) => {
   await basicInit(page);
-  
+  //expect default nonfranchise display to show up
   await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
   await expect(page.getByText('So you want a piece of the')).toBeVisible();
+
+  //login as a franchisee
   await page.getByRole('link', { name: 'Login', exact: true }).click();
   await page.getByRole('textbox', { name: 'Email address' }).fill('john@jwt.com');
   await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
   await page.getByRole('textbox', { name: 'Password' }).fill('1234');
   await page.getByRole('button', { name: 'Login' }).click();
+
+  //view franchisee dashboard
   await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+  await expect(page.getByRole('heading')).toContainText('John\'s Franchise');
+  await expect(page.locator('tbody')).toContainText('Lehi');
+  await expect(page.locator('tbody')).toContainText('Springville');
+  
+  //check create store page
+  await page.getByRole('button', { name: 'Create store' }).click();
+  await expect(page.getByRole('heading')).toContainText('Create store');
+  await expect(page.locator('form')).toContainText('Create');
 })
 
 test('login as admin', async ({page})=> {
