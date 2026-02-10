@@ -28,4 +28,5 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 60000,
   },
+  //oops the port was already taken because I was running it locally. Ooops
 });
