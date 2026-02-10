@@ -12,8 +12,13 @@ async function basicInit(page: Page) {
   await page.route('*/**/api/auth', async (route) => {
     const loginReq = route.request().postDataJSON();
     if (route.request().method() == 'DELETE'){
-       await route.fulfill({json: {message :"logout successful"}})
-       return;
+      await route.fulfill({json: {message :"logout successful"}})
+      return;
+    }
+    if (route.request().method() == 'POST'){
+      const userRes = { user: { id: 2, name: 'my man', email: 'myMan@jwt.com', roles: [{ role: 'diner' }] }, token: '12345' }
+      await route.fulfill({json: userRes})
+      return;
     }
     const user = validUsers[loginReq.email];
     if (!user || user.password !== loginReq.password) {
@@ -108,6 +113,10 @@ async function basicInit(page: Page) {
 
   // Order a pizza.
   await page.route('*/**/api/order', async (route) => {
+    if (route.request().method() == 'GET'){
+      route.fulfill({json: {orders: []} })
+      return;
+    }
     const orderReq = route.request().postDataJSON();
     const orderRes = {
       order: { ...orderReq, id: 23 },
@@ -207,7 +216,7 @@ test('login as franchisee', async ({page}) => {
   await expect(page.getByRole('heading')).toContainText('John\'s Franchise');
   await expect(page.locator('tbody')).toContainText('Lehi');
   await expect(page.locator('tbody')).toContainText('Springville');
-  
+
   //check create store page
   await page.getByRole('button', { name: 'Create store' }).click();
   await expect(page.getByRole('heading')).toContainText('Create store');
@@ -239,3 +248,23 @@ test('login as admin', async ({page})=> {
 
   await page.getByRole('button', { name: 'Cancel' }).click();
 })
+
+test('register new user', async ({page}) => {
+  await basicInit(page);
+  
+  await page.getByRole('link', { name: 'Register' }).click();
+  await expect(page.getByRole('heading')).toContainText('Welcome to the party');
+  await page.getByRole('textbox', { name: 'Full name' }).click();
+  await page.getByRole('textbox', { name: 'Full name' }).fill('My Guy');
+  await page.getByRole('textbox', { name: 'Full name' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Email address' }).fill('myguy@jwt.com');
+  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('1234');
+  await page.getByRole('button', { name: 'Register' }).click();
+  await expect(page.getByLabel('Global')).toContainText('mm');
+
+  
+  await page.getByRole('link', { name: 'mm' }).click();
+  await expect(page.getByRole('main')).toContainText('How have you lived this long without having a pizza? Buy one now!');
+  await expect(page.getByRole('main')).toContainText('my man');
+});
