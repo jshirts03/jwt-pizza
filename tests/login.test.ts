@@ -1,6 +1,25 @@
 import { test, expect } from 'playwright-test-coverage';
 
-async function adminLogin(page: Page)
+async function adminLogin(page: Page){
+
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
+  await page.getByRole('link', { name: 'Admin' }).click();
+  await expect(page.getByText('Mama Ricci\'s kitchen')).toBeVisible();
+  
+  await expect(page.getByRole('table')).toContainText('LotaPizza');
+  await page.getByRole('cell', { name: 'Lehi' }).click();
+  await expect(page.getByRole('table')).toContainText('Lehi');
+  await expect(page.getByRole('table')).toContainText('Springville');
+  await expect(page.getByRole('table')).toContainText('American Fork');
+  await expect(page.getByRole('table')).toContainText('PizzaCorp');
+  await expect(page.getByRole('table')).toContainText('topSpot');
+
+}
 
 
 
@@ -84,6 +103,10 @@ async function basicInit(page: Page) {
           "total revenue": 0,
       }
     ]
+    if (route.request().method() == 'DELETE'){
+      await route.fulfill({json: {message: 'franchise deleted'}})
+      return;
+    }
     expect(route.request().method()).toBe('GET');
     await route.fulfill({ json: franchiseRes });
 
@@ -106,6 +129,11 @@ async function basicInit(page: Page) {
         { id: 4, name: 'topSpot', stores: [] },
       ],
     };
+    if (route.request().method() == 'POST'){
+      const createFranchiseRes = { name: 'johns franchise', admins: [{ email: 'john@john.com', id: 2, name: 'John franchisee' }], id: 4 }
+      await route.fulfill({json: createFranchiseRes})
+      return;
+    }
     expect(route.request().method()).toBe('GET');
     await route.fulfill({ json: franchiseRes });
   });
@@ -225,33 +253,38 @@ test('login as franchisee', async ({page}) => {
 
 test('login as admin', async ({page})=> {
   await basicInit(page);
+  await adminLogin(page);
 
-  await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
-  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
-  await page.getByRole('textbox', { name: 'Password' }).fill('a');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
-  await page.getByRole('link', { name: 'Admin' }).click();
-  await expect(page.getByText('Mama Ricci\'s kitchen')).toBeVisible();
-  
-  await expect(page.getByRole('table')).toContainText('LotaPizza');
-  await page.getByRole('cell', { name: 'Lehi' }).click();
-  await expect(page.getByRole('table')).toContainText('Lehi');
-  await expect(page.getByRole('table')).toContainText('Springville');
-  await expect(page.getByRole('table')).toContainText('American Fork');
-  await expect(page.getByRole('table')).toContainText('PizzaCorp');
-  await expect(page.getByRole('table')).toContainText('topSpot');
+})
+
+test('create and delete franchise', async ({page}) => {
+  await basicInit(page)
+  await adminLogin(page)
+  //endpoints are mocked as to not actually edit the data of the franchise list, but this will suffice since we know that the franchises can be displayed
+
+  //create a franchise
   await page.getByRole('button', { name: 'Add Franchise' }).click();
-  await expect(page.getByRole('heading')).toContainText('Create franchise');
-  await expect(page.locator('form')).toContainText('Create');
+  await page.getByRole('textbox', { name: 'franchise name' }).click();
+  await page.getByRole('textbox', { name: 'franchise name' }).fill('John\'s Place');
+  await page.getByRole('textbox', { name: 'franchisee admin email' }).click();
+  await page.getByRole('textbox', { name: 'franchisee admin email' }).fill('john@jwt.com');
+  await page.getByRole('button', { name: 'Create' }).click();
+  await expect(page.locator('h2')).toContainText('Mama Ricci\'s kitchen');
+  await expect(page.getByRole('table')).toContainText('topSpot');
 
-  await page.getByRole('button', { name: 'Cancel' }).click();
+  //close a franchise
+  await page.getByRole('row', { name: 'LotaPizza Close' }).getByRole('button').click();
+  await expect(page.getByRole('heading')).toContainText('Sorry to see you go');
+  await expect(page.getByRole('main')).toContainText('LotaPizza');
+  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(page.locator('h2')).toContainText('Mama Ricci\'s kitchen');
+  await expect(page.locator('h3')).toContainText('Franchises');
 })
 
 test('register new user', async ({page}) => {
   await basicInit(page);
-  
+
+  //register new user
   await page.getByRole('link', { name: 'Register' }).click();
   await expect(page.getByRole('heading')).toContainText('Welcome to the party');
   await page.getByRole('textbox', { name: 'Full name' }).click();
@@ -263,7 +296,7 @@ test('register new user', async ({page}) => {
   await page.getByRole('button', { name: 'Register' }).click();
   await expect(page.getByLabel('Global')).toContainText('mm');
 
-  
+  //view diner dashboard
   await page.getByRole('link', { name: 'mm' }).click();
   await expect(page.getByRole('main')).toContainText('How have you lived this long without having a pizza? Buy one now!');
   await expect(page.getByRole('main')).toContainText('my man');
