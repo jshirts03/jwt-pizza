@@ -28,6 +28,7 @@ export default function DinerDashboard(props: Props) {
     })();
   }, [user]);
 
+
   function formatRole(role: { role: Role; objectId?: string }) {
     if (role.role === Role.Franchisee) {
       return `Franchisee on ${role.objectId}`;
@@ -36,11 +37,22 @@ export default function DinerDashboard(props: Props) {
     return role.role;
   }
 
+  //This function sets the user varaible (stored in the APP component)
+  //to be an updated user with information determined by the input values of the edit user dialog box.
   async function updateUser() {
-  setTimeout(() => {
-    HSOverlay.close(document.getElementById('hs-jwt-modal')!);
-  }, 100);
-}
+    let updatedUser: User = {
+      id: user.id,
+      name: nameRef.current?.value,
+      email: emailRef.current?.value,
+      password: passwordRef.current?.value || undefined,
+      roles: user.roles,
+    };
+
+    props.setUser(updatedUser);
+    setTimeout(() => {
+      HSOverlay.close(document.getElementById('hs-jwt-modal')!);
+    }, 100);
+  }
 
   return (
     <View title="Your pizza kitchen">
