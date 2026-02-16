@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import NotFound from './notFound';
 import Button from '../components/button';
 import { pizzaService } from '../service/service';
-import { Franchise, FranchiseList, Role, Store, User } from '../service/pizzaService';
+import { Franchise, FranchiseList, Role, Store, User } from '../service/pizzaService'; // type declaration
 import { TrashIcon } from '../icons';
 
 interface Props {
