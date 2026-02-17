@@ -83,7 +83,10 @@ async function basicInit(page: Page) {
   });
 
     //Franchisee view
-  await page.route(/\/api\/franchise\/\d+/, async (route) => {
+  await page.route(await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).click();
+  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();, async (route) => {
    const franchiseRes = [
       {
           "id": 4,
