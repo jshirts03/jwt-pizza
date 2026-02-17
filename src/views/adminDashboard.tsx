@@ -15,7 +15,8 @@ export default function AdminDashboard(props: Props) {
   const navigate = useNavigate();
   const [franchiseList, setFranchiseList] = React.useState<FranchiseList>({ franchises: [], more: false });
   const [franchisePage, setFranchisePage] = React.useState(0);
-  const [userList, setUserList] = React.useState<UserList>({ users: [], more: false})
+  const [userList, setUserList] = React.useState<UserList>({ users: [], more: false});
+  const [userPage, setUserPage] = React.useState(0);
   const filterFranchiseRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -23,6 +24,12 @@ export default function AdminDashboard(props: Props) {
       setFranchiseList(await pizzaService.getFranchises(franchisePage, 3, '*'));
     })();
   }, [props.user, franchisePage]);
+
+  React.useEffect(() => {
+    (async () => {
+      setFranchiseList(await pizzaService.getUsers(userPage, 10, '*'));
+    })();
+  }, [props.user, userPage]);
 
   function createFranchise() {
     navigate('/admin-dashboard/create-franchise');

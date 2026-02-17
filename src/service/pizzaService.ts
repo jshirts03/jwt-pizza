@@ -111,6 +111,7 @@ interface PizzaService {
   getFranchise(user: User): Promise<Franchise[]>;
   createFranchise(franchise: Franchise): Promise<Franchise>;
   getFranchises(page: number, limit: number, nameFilter: string): Promise<FranchiseList>;
+  getUsers(page: number, limit: number, nameFilter: string) : Promise<UserList>;
   closeFranchise(franchise: Franchise): Promise<void>;
   createStore(franchise: Franchise, store: Store): Promise<Store>;
   closeStore(franchise: Franchise, store: Store): Promise<null>;
