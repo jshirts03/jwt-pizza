@@ -1,6 +1,19 @@
 import { test, expect } from 'playwright-test-coverage';
 
+async function updateUserMock(page: Page) {
+  await page.route(/\/api\/user\/\d+/, async (route) => {
+    expect(route.request().method()).toBe('PUT');
+    let user = route.request().postDataJSON();
+    await route.fulfill({ json: user });
+  });
+}
+//So this correctly mocks out the update User endpoint, the problem is that I would also have to mock out a DB
+//a get user endpoint, and then somehow simulate that updating of a user
+//seems a bit too difficult to be worth it.
+
+
 test('updateUser', async ({ page }) => {
+  // await updateUserMock(page)
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
   await page.goto('/');
   await page.getByRole('link', { name: 'Register' }).click();
