@@ -59,7 +59,7 @@ async function basicInit(page: Page) {
   });
 
   // Return a mocked out list of users
-  await page.route('**/api/user', async (route) => {
+  await page.route(/\/api\/user(\?.*)?$/, async (route) => {
     const userRes = { users: [
       { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: 'diner' }] },
       { id: '4', name: 'John Franchise', email: 'john@jwt.com', password: '1234', roles: [{ role: 'diner' },{objectId: 2, role: "franchisee"}] },
