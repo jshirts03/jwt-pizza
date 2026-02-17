@@ -58,6 +58,17 @@ async function basicInit(page: Page) {
     await route.fulfill({ json: loggedInUser });
   });
 
+  // Return a mocked out list of users
+  await page.route('**/api/user', async (route) => {
+    const userRes = { users: [
+      { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: 'diner' }] },
+      { id: '4', name: 'John Franchise', email: 'john@jwt.com', password: '1234', roles: [{ role: 'diner' },{objectId: 2, role: "franchisee"}] },
+      { id: '5', name: 'Admin Bob', email: 'a@jwt.com', password: 'a', roles: [{ role: 'admin' }] }
+    ],
+    }
+    await route.fulfill({ json: userRes})
+  })
+
   // A standard menu
   await page.route('*/**/api/order/menu', async (route) => {
     const menuRes = [
@@ -260,8 +271,9 @@ test('login as admin', async ({page})=> {
 test('view User list', async ({page}) => {
   await basicInit(page);
   await adminLogin(page);
-
+  await page.getByRole('link', { name: 'Admin', exact: true }).click();
   await expect(page.getByRole('main')).toContainText('Users');
+  await expect(page.getByRole('main')).toContainText('Kai Chen');
 })
 
 test('create and delete franchise', async ({page}) => {
