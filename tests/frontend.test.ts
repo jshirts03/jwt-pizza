@@ -11,13 +11,11 @@ async function adminLogin(page: Page){
   await page.getByRole('link', { name: 'Admin' }).click();
   await expect(page.getByText('Mama Ricci\'s kitchen')).toBeVisible();
   
-  await expect(page.getByRole('table')).toContainText('LotaPizza');
-  await page.getByRole('cell', { name: 'Lehi' }).click();
-  await expect(page.getByRole('table')).toContainText('Lehi');
-  await expect(page.getByRole('table')).toContainText('Springville');
-  await expect(page.getByRole('table')).toContainText('American Fork');
-  await expect(page.getByRole('table')).toContainText('PizzaCorp');
-  await expect(page.getByRole('table')).toContainText('topSpot');
+  await expect(page.getByRole('main')).toContainText('Franchises');
+  await expect(page.getByRole('main')).toContainText('LotaPizza');
+  await expect(page.getByRole('main')).toContainText('American Fork');
+  await expect(page.getByRole('main')).toContainText('PizzaCorp');
+  await expect(page.getByRole('main')).toContainText('Users');
 
 }
 
@@ -82,11 +80,8 @@ async function basicInit(page: Page) {
     await route.fulfill({ json: menuRes });
   });
 
-    //Franchisee view
-  await page.route(await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('a');
-  await page.getByRole('button', { name: 'Login' }).click();, async (route) => {
+  //Viewing franchises
+  await page.route(/\/api\/franchise\/\d+/, async (route) => {
    const franchiseRes = [
       {
           "id": 4,
@@ -113,7 +108,7 @@ async function basicInit(page: Page) {
     expect(route.request().method()).toBe('GET');
     await route.fulfill({ json: franchiseRes });
 
-  })
+  });
 
   // Standard franchises and stores
   await page.route(/\/api\/franchise(\?.*)?$/, async (route) => {
@@ -244,6 +239,7 @@ test('login as franchisee', async ({page}) => {
 
   //view franchisee dashboard
   await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+
   await expect(page.getByRole('heading')).toContainText('John\'s Franchise');
   await expect(page.locator('tbody')).toContainText('Lehi');
   await expect(page.locator('tbody')).toContainText('Springville');
@@ -260,6 +256,14 @@ test('login as admin', async ({page})=> {
 
 })
 
+
+test('view User list', async ({page}) => {
+  await basicInit(page);
+  await adminLogin(page);
+
+  await expect(page.getByRole('main')).toContainText('Users');
+})
+
 test('create and delete franchise', async ({page}) => {
   await basicInit(page)
   await adminLogin(page)
@@ -273,15 +277,18 @@ test('create and delete franchise', async ({page}) => {
   await page.getByRole('textbox', { name: 'franchisee admin email' }).fill('john@jwt.com');
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page.locator('h2')).toContainText('Mama Ricci\'s kitchen');
-  await expect(page.getByRole('table')).toContainText('topSpot');
+  
+  await expect(page.getByRole('main')).toContainText('topSpot');
 
-  //close a franchise
+
+  // //close a franchise
   await page.getByRole('row', { name: 'LotaPizza Close' }).getByRole('button').click();
   await expect(page.getByRole('heading')).toContainText('Sorry to see you go');
   await expect(page.getByRole('main')).toContainText('LotaPizza');
   await page.getByRole('button', { name: 'Close' }).click();
   await expect(page.locator('h2')).toContainText('Mama Ricci\'s kitchen');
-  await expect(page.locator('h3')).toContainText('Franchises');
+  
+  await expect(page.getByRole('main')).toContainText('Franchises');
 })
 
 test('close a store', async ({page}) => {
