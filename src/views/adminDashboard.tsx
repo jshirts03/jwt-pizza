@@ -27,7 +27,7 @@ export default function AdminDashboard(props: Props) {
 
   React.useEffect(() => {
     (async () => {
-      setFranchiseList(await pizzaService.getUsers(userPage, 10, '*'));
+      setUserList(await pizzaService.getUsers(userPage, 10, '*'));
     })();
   }, [props.user, userPage]);
 
@@ -145,21 +145,21 @@ export default function AdminDashboard(props: Props) {
                           ))}
                         </tr>
                       </thead>
-                      {franchiseList.franchises.map((franchise, findex) => {
+                      {userList.users.map((user, uindex) => {
                         return (
-                          <tbody key={findex} className="divide-y divide-gray-200">
+                          <tbody key={uindex} className="divide-y divide-gray-200">
                             <tr className="border-neutral-500 border-t-2">
-                              <td className="text-start px-2 whitespace-nowrap text-l font-mono text-orange-600">{franchise.name}</td>
+                              <td className="text-start px-2 whitespace-nowrap text-l font-mono text-orange-600">{user.name}</td>
                               <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800" colSpan={1}>
-                                {franchise.admins?.map((o) => o.name).join(', ')}
+                                {user.email}
                               </td>
                               <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800" colSpan={1}>
-                                Diner
+                                {user.roles?.map((o) => o.role).join(', ')}
                               </td>
                               <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
                                 <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400  hover:border-orange-800 hover:text-orange-800" onClick={() => closeFranchise(franchise)}>
                                   <TrashIcon />
-                                  Close
+                                  Delete
                                 </button>
                               </td>
                             </tr>
