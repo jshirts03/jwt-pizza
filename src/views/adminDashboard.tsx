@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import NotFound from './notFound';
 import Button from '../components/button';
 import { pizzaService } from '../service/service';
-import { Franchise, FranchiseList, Role, Store, User } from '../service/pizzaService'; // type declaration
+import { Franchise, FranchiseList, Role, Store, User, UserList } from '../service/pizzaService'; // type declaration
 import { TrashIcon } from '../icons';
 
 interface Props {
@@ -15,7 +15,7 @@ export default function AdminDashboard(props: Props) {
   const navigate = useNavigate();
   const [franchiseList, setFranchiseList] = React.useState<FranchiseList>({ franchises: [], more: false });
   const [franchisePage, setFranchisePage] = React.useState(0);
-  const [userList, setUserList] = React.useState
+  const [userList, setUserList] = React.useState<UserList>({ users: [], more: false})
   const filterFranchiseRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
