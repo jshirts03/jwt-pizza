@@ -75,6 +75,12 @@ export default function AdminDashboard(props: Props) {
 
   async function deleteUser(){
     await pizzaService.deleteUser(deletedUser)
+    if (filterUserRef.current?.value){
+        filterUsers();
+      }
+      else{
+        setUserList(await pizzaService.getUsers(userPage, 10, '*'));
+      }
   }
 
   let response = <NotFound />;
