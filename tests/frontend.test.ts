@@ -66,6 +66,13 @@ async function basicInit(page: Page) {
       { id: '5', name: 'Admin Bob', email: 'a@jwt.com', password: 'a', roles: [{ role: 'admin' }] }
     ],
     }
+    const url = route.request().url();
+    const parsed = new URL(url);
+    let name = parsed.searchParams.get("name");
+    if (name != '*' && name != null){
+      name = name.replace(/\*/g, "")
+      userRes.users = userRes.users.filter((u) => (u.name.includes(name)))
+    }
     await route.fulfill({ json: userRes})
   })
 
@@ -274,6 +281,21 @@ test('view User list', async ({page}) => {
   await page.getByRole('link', { name: 'Admin', exact: true }).click();
   await expect(page.getByRole('main')).toContainText('Users');
   await expect(page.getByRole('main')).toContainText('Kai Chen');
+})
+
+test('filter User list', async ({page}) => {
+  await basicInit(page);
+  await adminLogin(page);
+  await page.getByRole('link', { name: 'Admin', exact: true }).click();
+  await expect(page.getByRole('main')).toContainText('Users');
+  await expect(page.getByRole('main')).toContainText('Kai Chen');
+  
+  await page.getByRole('textbox', { name: 'Filter users' }).click();
+  await page.getByRole('textbox', { name: 'Filter users' }).fill('Kai');
+  await page.getByRole('button', { name: 'Submit' }).nth(1).click();
+
+  await expect(page.getByRole('main')).toContainText('Kai Chen');
+  await expect(page.getByRole('main')).not.toContainText('John');
 })
 
 test('create and delete franchise', async ({page}) => {
