@@ -120,6 +120,10 @@ class HttpPizzaService implements PizzaService {
     return this.callEndpoint(`/api/franchise/${franchise.id}/store/${store.id}`, 'DELETE');
   }
 
+  async deleteUser(user: User): Promise<null> {
+    return this.callEndpoint(`api/user`, 'DELETE')
+  }
+
   async docs(docType: string): Promise<Endpoints> {
     if (docType === 'factory') {
       return this.callEndpoint(pizzaFactoryUrl + `/api/docs`);
