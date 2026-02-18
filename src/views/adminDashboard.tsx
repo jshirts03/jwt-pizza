@@ -5,7 +5,8 @@ import NotFound from './notFound';
 import Button from '../components/button';
 import { pizzaService } from '../service/service';
 import { Franchise, FranchiseList, Role, Store, User, UserList } from '../service/pizzaService'; // type declaration
-import { TrashIcon } from '../icons';
+import { TrashIcon, CloseIcon } from '../icons';
+import { HSOverlay } from 'preline';
 
 interface Props {
   user: User | null;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function AdminDashboard(props: Props) {
   const navigate = useNavigate();
+  const [deletedUser, setDeletedUser] = React.useState<User>({name: "", email: ""})
   const [franchiseList, setFranchiseList] = React.useState<FranchiseList>({ franchises: [], more: false });
   const [franchisePage, setFranchisePage] = React.useState(0);
   const [userList, setUserList] = React.useState<UserList>({ users: [], more: false});
@@ -64,6 +66,15 @@ export default function AdminDashboard(props: Props) {
   
   async function filterUsers() {
     setUserList(await pizzaService.getUsers(userPage, 10, `*${filterUserRef.current?.value}*`));
+  }
+
+  function confirmDelete(user){
+    setDeletedUser(user);
+    HSOverlay.open(document.getElementById('hs-jwt-modal')!)
+  }
+
+  async function deleteUser(){
+    await pizzaService.deleteUser(deletedUser)
   }
 
   let response = <NotFound />;
@@ -176,7 +187,7 @@ export default function AdminDashboard(props: Props) {
                                 {user.roles?.map((o) => o.role).join(', ')}
                               </td>
                               <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
-                                <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400  hover:border-orange-800 hover:text-orange-800" onClick={() => closeFranchise(franchise)}>
+                                <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400  hover:border-orange-800 hover:text-orange-800" onClick={() => confirmDelete(user)}>
                                   <TrashIcon />
                                   Delete
                                 </button>
@@ -212,6 +223,23 @@ export default function AdminDashboard(props: Props) {
         </div>
         <div>
           <Button className="w-36 text-xs sm:text-sm sm:w-64" title="Add Franchise" onPress={createFranchise} />
+        </div>
+        <div role="dialog" aria-modal="true" aria-labelledby="dialog-title" id="hs-jwt-modal" className="hs-overlay hidden size-full fixed top-10 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none">
+          <div className="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto min-h-[calc(100%-3.5rem)]">
+            <div className="w-full flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto   ">
+              <div className="flex justify-between items-center py-3 px-4 border-b bg-slate-200 rounded-t-xl ">
+                <h3 className="font-bold text-gray-800">Are you sure you want to delete: {deletedUser.name}?</h3>
+                  <button type="button" className="flex justify-center items-center size-7 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#hs-jwt-modal">
+                    <CloseIcon className="" />
+                  </button>
+              </div>
+              <div className="flex justify-center items-center gap-x-2 py-3 px-4 border-t  bg-slate-200 rounded-b-xl">
+                <button type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none" onClick={() => deleteUser()}>
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </View>
     );
