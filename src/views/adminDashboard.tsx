@@ -81,6 +81,7 @@ export default function AdminDashboard(props: Props) {
       else{
         setUserList(await pizzaService.getUsers(userPage, 10, '*'));
       }
+    HSOverlay.close(document.getElementById('hs-jwt-modal')!)
   }
 
   let response = <NotFound />;
