@@ -68,7 +68,7 @@ export default function AdminDashboard(props: Props) {
     setUserList(await pizzaService.getUsers(userPage, 10, `*${filterUserRef.current?.value}*`));
   }
 
-  function confirmDelete(user){
+  function confirmDelete(user: User){
     setDeletedUser(user);
     HSOverlay.open(document.getElementById('hs-jwt-modal')!)
   }
