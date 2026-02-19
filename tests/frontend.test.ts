@@ -257,7 +257,7 @@ test('login as franchisee', async ({page}) => {
 
   //view franchisee dashboard
   await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
-
+  
   await expect(page.getByRole('heading')).toContainText('John\'s Franchise');
   await expect(page.locator('tbody')).toContainText('Lehi');
   await expect(page.locator('tbody')).toContainText('Springville');
@@ -355,3 +355,19 @@ test('register new user', async ({page}) => {
   await expect(page.getByRole('main')).toContainText('How have you lived this long without having a pizza? Buy one now!');
   await expect(page.getByRole('main')).toContainText('my man');
 });
+
+//updates user name and password correctly
+test('updateUser diner', async ({ page }) => {
+  // await updateUserMock(page)
+  await basicInit(page);
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
+  await page.getByRole('textbox', { name: 'Email address' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Password' }).fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+  
+  await page.getByRole('link', { name: 'KC' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(page.locator('h3')).toContainText('Edit user');
+});
+
