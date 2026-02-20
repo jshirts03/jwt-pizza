@@ -371,3 +371,11 @@ test('updateUser diner', async ({ page }) => {
   await expect(page.locator('h3')).toContainText('Edit user');
 });
 
+
+test('docs', async ({page}) => {
+  await basicInit(page);
+  await page.goto('http://localhost:5173/docs');
+  await expect(page.getByRole('heading')).toContainText('JWT Pizza API');
+})
+
+
