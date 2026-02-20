@@ -60,6 +60,10 @@ async function basicInit(page: Page) {
 
   // Return a mocked out list of users
   await page.route(/\/api\/user(\?.*)?$/, async (route) => {
+    if (route.request().method() == 'DELETE'){
+      const message = {message: 'successfully deleted'}
+      await route.fulfill({ json: message})
+    }
     const userRes = { users: [
       { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: 'diner' }] },
       { id: '4', name: 'John Franchise', email: 'john@jwt.com', password: '1234', roles: [{ role: 'diner' },{objectId: 2, role: "franchisee"}] },
@@ -377,5 +381,7 @@ test('docs', async ({page}) => {
   await page.goto('http://localhost:5173/docs');
   await expect(page.getByRole('heading')).toContainText('JWT Pizza API');
 })
+
+
 
 
