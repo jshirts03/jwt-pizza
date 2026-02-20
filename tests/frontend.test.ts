@@ -63,6 +63,7 @@ async function basicInit(page: Page) {
     if (route.request().method() == 'DELETE'){
       const message = {message: 'successfully deleted'}
       await route.fulfill({ json: message})
+      return;
     }
     const userRes = { users: [
       { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: 'diner' }] },
@@ -382,6 +383,22 @@ test('docs', async ({page}) => {
   await expect(page.getByRole('heading')).toContainText('JWT Pizza API');
 })
 
+test('delete user', async ({page}) => {
+  await basicInit(page);
+  await adminLogin(page);
 
+  await page.getByRole('button', { name: 'Delete' }).first().click();
+  await expect(page.locator('#hs-jwt-modal')).toContainText('Are you sure you want to delete: Kai Chen?');
+  await page.getByRole('button', { name: 'Yes' }).click();
+})
+
+test('user filter and page turn', async ({page}) => {
+  await basicInit(page);
+  await adminLogin(page);
+  await page.getByRole('textbox', { name: 'Filter users' }).click();
+  await page.getByRole('textbox', { name: 'Filter users' }).fill('Bob');
+  await page.getByRole('button', { name: 'Submit' }).nth(1).click();
+  await expect(page.getByRole('main')).toContainText('Admin Bob');
+})
 
 
